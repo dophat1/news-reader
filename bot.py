@@ -372,12 +372,11 @@ def daily_due(db, local, daily_time):
     return local.strftime("%H:%M") >= daily_time and not db.execute(
         "SELECT 1 FROM schedule WHERE day=?", (local.date().isoformat(),)).fetchone()
 
-def doctor():
+def doctor(config_path):
     settings = [
         "TELEGRAM_BOT_TOKEN",
         "TELEGRAM_CHAT_ID",
     ]
-
     for name in settings:
         value = os.getenv(name)
 
@@ -385,6 +384,16 @@ def doctor():
             print(f"{name}: configured")
         else:
             print(f"{name}: missing")
+    
+    try:
+        config = load_config(config_path)
+        print("Topic configuration: valid")
+        print(f"Topics loaded: {len(config['topics'])}")
+
+    except (RuntimeError, ValueError, KeyError, AssertionError, OSError, sqlite3.Error):
+        print("Topic configuration: invalid or unreadable")
+
+    
 
 def main():
     load_dotenv()
@@ -399,7 +408,7 @@ def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
     if a.command == "doctor":
-        doctor()
+        doctor(a.config)
         return
     
     try:
