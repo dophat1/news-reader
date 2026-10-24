@@ -1,0 +1,17 @@
+{
+  "timezone": "Asia/Ho_Chi_Minh",
+  "daily_time": "08:00",
+  "lookback_hours": 48,
+  "max_pages": 2,
+  "digest_size": 10,
+  "topics": [
+    {
+      "name": "Local AI",
+      "keywords": ["ollama", "local llm", "llama"],
+      "exclude": ["giveaway"],
+      "sources": ["hn", "rss", "github"],
+      "subreddits": ["LocalLLaMA"],
+      "rss": ["https://hnrss.org/newest"]
+    }
+  ]
+}
