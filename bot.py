@@ -372,11 +372,24 @@ def daily_due(db, local, daily_time):
     return local.strftime("%H:%M") >= daily_time and not db.execute(
         "SELECT 1 FROM schedule WHERE day=?", (local.date().isoformat(),)).fetchone()
 
+def doctor():
+    settings = [
+        "TELEGRAM_BOT_TOKEN",
+        "TELEGRAM_CHAT_ID",
+    ]
+
+    for name in settings:
+        value = os.getenv(name)
+
+        if value and value.strip():
+            print(f"{name}: configured")
+        else:
+            print(f"{name}: missing")
 
 def main():
     load_dotenv()
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("command", choices=["run-once", "schedule", "outbox", "resolve"])
+    p.add_argument("command", choices=["run-once", "schedule", "outbox", "resolve", "doctor"])
     p.add_argument("--config", default="topics.json")
     p.add_argument("--db", default="bot.sqlite")
     p.add_argument("--dry-run", action="store_true")
@@ -384,6 +397,11 @@ def main():
     p.add_argument("--action", choices=["retry", "skip"])
     a = p.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+
+    if a.command == "doctor":
+        doctor()
+        return
+    
     try:
         with locked(a.db + ".lock"):
             db = connect(a.db)
@@ -412,6 +430,9 @@ def main():
                     return 2 if run(db, http, c, a.dry_run) else 0
                 if a.dry_run:
                     p.error("Use run-once --dry-run for previews")
+                
+              
+
                 while True:
                     local = datetime.now(ZoneInfo(c["timezone"]))
                     day = local.date().isoformat()
